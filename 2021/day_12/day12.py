@@ -74,13 +74,16 @@ def r2(a) :
     caves_map = direct_links(a)
     small_caves = [cave for cave in caves_map if is_small(cave) and cave not in ('start', 'end')]
     print(small_caves)
-    paths = []
+    hash_table = []
+    res = 0
     for small_cave in small_caves :
         print(small_cave)
-        for path in list(explore2(caves_map, ['start'], small_cave)) :
-            if path not in paths : # :tired_face:
-                paths.append(path)
-    return len(paths)
+        for path in explore2(caves_map, ['start'], small_cave) :
+            h = hash(''.join(path))
+            if h not in hash_table :
+                hash_table.append(h)
+                res += 1
+    return res
 
 
 
