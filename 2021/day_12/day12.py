@@ -78,7 +78,7 @@ def r2(a) :
     for small_cave in small_caves :
         print(small_cave)
         for path in list(explore2(caves_map, ['start'], small_cave)) :
-            if True : # :tired_face:
+            if path not in paths : # :tired_face:
                 paths.append(path)
     return len(paths)
 
