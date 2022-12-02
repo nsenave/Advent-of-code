@@ -8,5 +8,5 @@ else
 fi
 
 git add $daydir
-git commit -m "day $daynumber 2021"
+git commit -m "day $daynumber 2022"
 git push
