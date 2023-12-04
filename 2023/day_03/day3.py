@@ -51,75 +51,57 @@ def r1(a: np.array) :
             while is_number(a[i,j]) :
                 current_number += a[i,j]
                 j += 1
-            else :
-                if current_number != '' and is_symbol_around(a, i, j0, j-1) :
-                    result += int(current_number)
-                #if current_number != '' and not is_symbol_around(a, i, j0, j-1) :
-                #    print(current_number)
-                j += 1
+            if current_number != '' and is_symbol_around(a, i, j0, j-1) :
+                result += int(current_number)
+                #print(current_number)
+            j += 1
     return result
 
 
 
-def is_number_around(a: np.array, i:int, j:int) -> bool:
-    for i in (i-1, i, i+1):
-        for j in (j-1, j, j+1) :
-            if is_number(a[i,j]) :
-                return True
-    return False
+def scan_part_number_right(row:np.array, j_start:int, j_gear:int) -> str:
+    res = ''
+    j = j_start
+    while j <= j_gear or is_number(row[j]) :
+        res += row[j]
+        j += 1
+    return res
 
-def find_part_number(a: np.array, i: int, j_gear:int) -> int:
-    j = j_gear - 1
-    while j < a.shape[1] and not is_number(a[i, j]) :
-        j += 1
-        if j > j_gear + 1 :
-            return None
-    j0 = j
-    while j < a.shape[1] and j >= 0 and is_number(a[i, j0]) :
-        j0 -= 1
-    j0 += 1
-    j = j0
-    while j < a.shape[1] and is_number(a[i, j]) :
-        j += 1
-    j1 = j
-    string_res = " ".join(a[i, j0:j1].tolist()).replace(" ", "")
-    if string_res == "" :
-        return None
-    return int(string_res)
+def scan_part_number_left(row:np.array, j_start:int, j_gear:int) -> str:
+    res = ''
+    j = j_start
+    while j >= j_gear or is_number(row[j]) :
+        res = row[j] + res
+        j -= 1
+    return res
+
+def find_part_numbers(scaned_string: str) -> set:
+    cleaned_string = ''
+    for c in scaned_string:
+        cleaned_string += c if is_number(c) else ' '
+    res = cleaned_string.split(' ')
+    while '' in res:
+        res.remove('')
+    return list(map(int, res))
 
 def gear_ratio(a: np.array, i_gear: int, j_gear: int) -> int:
-    part_numbers = set()
-    part_number_above = find_part_number(a, i_gear-1, j_gear)
-    if (part_number_above is not None) and is_number(a[i_gear-1, j_gear+1]) and a[i_gear-1, j_gear] == '.' :
-        j = j_gear+1
-        other_above_number = ''
-        while is_number(a[i_gear-1, j]) :
-            other_above_number += a[i_gear-1, j]
-            j += 1
-        part_numbers.add(int(other_above_number))
-    part_number_left = None
-    if is_number(a[i_gear, j_gear-1]) :
-        part_number_left = find_part_number(a, i_gear, j_gear-1)
-    part_number_right = None
-    if is_number(a[i_gear, j_gear+1]) :
-        part_number_right = find_part_number(a, i_gear, j_gear+1)
-    part_number_below = find_part_number(a, i_gear+1, j_gear)
-    if (part_number_below is not None) and is_number(a[i_gear+1, j_gear+1]) and a[i_gear+1, j_gear] == '.' :
-        j = j_gear+1
-        other_below_number = ''
-        while is_number(a[i_gear+1, j]) :
-            other_below_number += a[i_gear+1, j]
-            j += 1
-        part_numbers.add(int(other_below_number))
-    
-    for part_number in [part_number_above, part_number_left, part_number_right, part_number_below] :
-        if part_number is not None :
-            part_numbers.add(part_number)
+    part_numbers = []
+    # Above row
+    part_numbers += find_part_numbers(
+        scan_part_number_left(a[i_gear-1,:], j_gear-1, j_gear) + scan_part_number_right(a[i_gear-1,:], j_gear, j_gear))
+    # Left from gear
+    part_numbers += find_part_numbers(
+        scan_part_number_left(a[i_gear,:], j_gear-1, j_gear))
+    # Right from gear
+    part_numbers += find_part_numbers(
+        scan_part_number_right(a[i_gear,:], j_gear+1, j_gear))
+    # Below row
+    part_numbers += find_part_numbers(
+        scan_part_number_left(a[i_gear+1,:], j_gear-1, j_gear) + scan_part_number_right(a[i_gear+1,:], j_gear, j_gear))
     #print(part_numbers)
     if len(part_numbers) != 2 :
         return None
-    part_numbers_list = list(part_numbers)
-    return part_numbers_list[0] * part_numbers_list[1]
+    return part_numbers[0] * part_numbers[1]
 
 def r2(a) :
     if a is None :
@@ -142,7 +124,9 @@ class TestsOfToday(unittest.TestCase):
         pass
 
     def test(self):
-        self.assertEqual(1, 1)
+        self.assertEqual('.755', scan_part_number_right(np.array(['.', '.', '.', '.', '.', '.', '.', '7', '5', '5', '.', '.']), 6, 6))
+        self.assertEqual('598', scan_part_number_right(np.array(['.', '.', '6', '6', '4', '.', '5', '9', '8', '.', '.', '.']), 6, 6))
+        self.assertEqual('', scan_part_number_left(np.array(['.', '.', '6', '6', '4', '.', '5', '9', '8', '.', '.', '.']), 5, 6))
 
 if __name__ == '__main__':
     unittest.main(exit=False)
