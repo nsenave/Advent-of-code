@@ -102,8 +102,9 @@ def r2(a) :
 # Idea:
 #       [-------------------]     (range of seeds)
 # <------------>      <---------> (maps of a section of the almanac)
-#       [******][----][*****]     (ranges of seeds after this section)
+#       [******][----][*****]     (ranges of 'seeds' after this section)
 # (those with ** are then shifted)
+# Note: seed > fertilizer > water > light > temperature > humidity: all this will be called 'seeds'
 
 class StepInterval :
     def __init__(self, start: int, end: int, shift: int):
@@ -151,14 +152,12 @@ def r2_bis(a):
             seed_interval = seed_intervals.pop()
             new_intervals += apply_step(seed_interval, step)
         seed_intervals = new_intervals
+    location_intervals = seed_intervals # intervals been through all almanac sections and now correspond to locations
     #print(seed_intervals)
-    # Find the minimum location by only computing edges of each seed interval
+    # Find the minimum location which will be at an edge of one of the intervals
     min_location = 99999999
-    for seed_interval in seed_intervals:
-        for number in (seed_interval.start, seed_interval.end - 1):
-            for section in almanac:
-                number = to_destination(number, section)
-            location = number
+    for location_interval in location_intervals:
+        for location in (location_interval.start, location_interval.end - 1):
             if location < min_location:
                 min_location = location
     return min_location
@@ -238,7 +237,5 @@ if __name__ == '__main__':
     answer2 = r2_bis(puzzle)
     t1 = time.time()
 
-    print(f"Puzzle answer:  {answer2}")
-    print(f"Time to compute part two: {t1-t0} seconds")
-
     print(f"Puzzle result (method 2):  {answer2}")
+    print(f"Time to compute part two: {t1-t0} seconds")
