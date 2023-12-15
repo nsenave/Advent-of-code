@@ -21,6 +21,8 @@ print("Example input:")
 print_image(example)
 
 def count_galaxies(image: list) -> int:
+    if image is None:
+        return None
     res = 0
     for row in image:
         for pixel in row:
