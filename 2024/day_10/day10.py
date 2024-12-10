@@ -32,26 +32,26 @@ def hiking_trails(topographic_map: np.array, debug=False):
         for j in range(m):
             if topographic_map[i,j] == 0:
                 reached_coords = []
-                reachable = helper(topographic_map, i, j, reached_coords)
-                res += reachable
+                score = compute_score(topographic_map, i, j, reached_coords)
+                res += score
                 if debug:
-                    print(f"{reachable} reachable paths from {(i,j)}")
+                    print(f"Trailhead at {(i,j)} has a score of {score}")
     return res
 
-def helper(topographic_map, i, j, reached_coords):
+def compute_score(topographic_map, i, j, reached_coords):
     if topographic_map[i,j] == 9 and (i,j) not in reached_coords:
         reached_coords.append((i,j))
         return 1
-    reached = 0
+    res = 0
     if move_up(topographic_map, i, j):
-        reached += helper(topographic_map, i-1, j, reached_coords)
+        res += compute_score(topographic_map, i-1, j, reached_coords)
     if move_down(topographic_map, i, j):
-        reached += helper(topographic_map, i+1, j, reached_coords)
+        res += compute_score(topographic_map, i+1, j, reached_coords)
     if move_right(topographic_map, i, j):
-        reached += helper(topographic_map, i, j+1, reached_coords)
+        res += compute_score(topographic_map, i, j+1, reached_coords)
     if move_left(topographic_map, i, j):
-        reached += helper(topographic_map, i, j-1, reached_coords)
-    return reached
+        res += compute_score(topographic_map, i, j-1, reached_coords)
+    return res
 
 def move_up(topographic_map, i, j): 
     return (i > 0) and (topographic_map[i-1,j] - topographic_map[i,j] == 1)
@@ -68,23 +68,23 @@ def move_left(topographic_map, i, j):
 def r1(puzzle_input, debug=False) :
     if puzzle_input is None:
         return None
-    return hiking_trails(puzzle_input)
+    return hiking_trails(puzzle_input, debug)
 
 
 
-def helper2(topographic_map, i, j):
+def compute_rating(topographic_map, i, j):
     if topographic_map[i,j] == 9 :
         return 1
-    reached = 0
+    res = 0
     if move_up(topographic_map, i, j):
-        reached += helper2(topographic_map, i-1, j)
+        res += compute_rating(topographic_map, i-1, j)
     if move_down(topographic_map, i, j):
-        reached += helper2(topographic_map, i+1, j)
+        res += compute_rating(topographic_map, i+1, j)
     if move_right(topographic_map, i, j):
-        reached += helper2(topographic_map, i, j+1)
+        res += compute_rating(topographic_map, i, j+1)
     if move_left(topographic_map, i, j):
-        reached += helper2(topographic_map, i, j-1)
-    return reached
+        res += compute_rating(topographic_map, i, j-1)
+    return res
 
 def hiking_trails2(topographic_map: np.array, debug=False):
     res = 0
@@ -92,16 +92,16 @@ def hiking_trails2(topographic_map: np.array, debug=False):
     for i in range(n):
         for j in range(m):
             if topographic_map[i,j] == 0:
-                reachable = helper2(topographic_map, i, j)
-                res += reachable
+                rating = compute_rating(topographic_map, i, j)
+                res += rating
                 if debug:
-                    print(f"{reachable} reachable paths from {(i,j)}")
+                    print(f"Trailhead at {(i,j)} has a rating of {rating}")
     return res
 
 def r2(puzzle_input, debug=False) :
     if puzzle_input is None:
         return None
-    return hiking_trails2(puzzle_input)
+    return hiking_trails2(puzzle_input, debug)
 
 
 
@@ -153,7 +153,7 @@ class TestsOfToday(unittest.TestCase):
 765.987
 876....
 987....""")
-        self.example6 = to_array("""\
+        self.example7 = to_array("""\
 012345
 123456
 234567
@@ -174,7 +174,7 @@ class TestsOfToday(unittest.TestCase):
     def test2(self):
         self.assertEqual(3, hiking_trails2(self.example5))
         self.assertEqual(13, hiking_trails2(self.example6))
-        self.assertEqual(227, hiking_trails2(self.example6))
+        self.assertEqual(227, hiking_trails2(self.example7))
 
 if __name__ == '__main__':
     unittest.main(exit=False)
