@@ -10,33 +10,35 @@ def parse_input(file_path: str) :
         return f.read()
 
 
+
 # --- Part One ---
 
 def decompress(compressed: str, id=0) -> list:
     res = []
-    for i in range(0, len(compressed) - 1, 2):
+    length = len(compressed)
+    for i in range(0, length, 2):
         file_size = int(compressed[i])
-        empty_size = int(compressed[i + 1])
         for _ in range(file_size):
             res.append(str(id))
-        for _ in range(empty_size):
+        if i + 1 == length:
+            break
+        empty_space = int(compressed[i + 1])
+        for _ in range(empty_space):
             res.append('.')
         id += 1
-    if len(compressed) % 2 == 1:
-        res += str(id) * int(compressed[-1])
     return res
 
 # Naive approach
 # (kept as a control on the example input)
 
-def get_last(blocks: list, length: int):
-    i = length - 1
+def get_last(blocks: list, right_index: int):
+    i = right_index - 1
     while i >= 0 and blocks[i] == '.':
         i -= 1
     return blocks[i], i
 
-def get_first_empty(block: list):
-    i = 0
+def get_first_empty(block: list, left_index: int):
+    i = left_index
     while block[i] != '.':
         i += 1
     return i
@@ -45,12 +47,12 @@ def rearrange(blocks: list) -> list:
     """Rearrange the elements of the given list."""
     length = len(blocks)
     block, end_index = get_last(blocks, length)
-    start_index = get_first_empty(blocks)
+    start_index = get_first_empty(blocks, 0)
     while start_index < end_index:
         blocks[end_index] = '.'
         blocks[start_index] = block
-        block, end_index = get_last(blocks, length)
-        start_index = get_first_empty(blocks)
+        block, end_index = get_last(blocks, end_index)
+        start_index = get_first_empty(blocks, start_index)
     return blocks
 
 def compute_checksum(blocks: list, position=0):
@@ -113,7 +115,7 @@ def compact_checksum(compressed: str, debug=False):
             empty_space += int(empty_start)
         if debug:
             print(f"Current section: {current_section} (empty space = {empty_space})")
-        insert_file(str(file_end_id), file_end_size, current_section)
+        insert_file(file_end_id, file_end_size, current_section)
         empty_space -= file_end_size # (can eventually be negative on last iteration but it's ok)
         if debug:
             print(f"After insertion: {current_section} (empty space = {empty_space})")
@@ -145,53 +147,60 @@ def insert_at(index: int, elements: list, some_list: list) -> list:
     some_list[index:index] = elements
     return some_list
 
-def decompress_with_register(compressed: str, ids_register) -> list:
+# Only used for debugging
+def decompress_with_register(blocks: list, ids_register) -> list:
     res = []
-    for i in range(0, len(compressed) - 1, 2):
+    length = len(blocks)
+    for i in range(0, length - 1, 2):
         id = ids_register[i // 2]
-        file_size = int(compressed[i])
-        empty_size = int(compressed[i + 1])
+        file_size = blocks[i]
         for _ in range(file_size):
-            res.append(str(id))
-        for _ in range(empty_size):
+            res.append(int(id))
+        empty_space = blocks[i + 1]
+        for _ in range(empty_space):
             res.append('.')
-    if len(compressed) % 2 == 1:
-        res += str(id) * int(compressed[-1])
     return res
 
+def to_string(int_list: list):
+    return ''.join(map(str, int_list))
+
 def defragment(disk_map: str, debug=False):
-    blocks = list(disk_map + '0')
-    file_end_id = len(disk_map) // 2
-    ids_register = [id for id in range(file_end_id + 1)]
+    blocks = list(map(int, disk_map + '0'))
+    last_id = len(disk_map) // 2
+    ids_register = [id for id in range(last_id + 1)]
     if debug:
         print("--- Start defragmenting ---")
-    for id in reversed(range(1, file_end_id + 1)):
+    for id in reversed(range(1, last_id + 1)):
+        position = ids_register.index(id) * 2
+        moved_size = blocks[position]
+        i = 0
+        while moved_size > blocks[i+1] and i < position:
+            i += 2
         if debug:
             print(f"Register: {ids_register}")
             print(f"Compressed blocks: {blocks}")
-        position = ids_register.index(id) * 2
-        size = int(blocks[position])
-        if debug:
-            print(f"About to insert file '{id}' of size {blocks[position]}")
-        i = 0
-        while size > int(blocks[i+1]) and i < position:
-            i += 2
-        if debug:
-            print(f"File '{id}' can be inserted in empty space at {i}")
+            print(f"Decompressed blocks: {to_string(decompress_with_register(blocks, ids_register))}")
+            print("")
+            print(f"About to move file '{id}' of size {moved_size} from {position}")
         if i != position:
-            file_empty_size = int(blocks[i+1])
-            blocks[i+1] = '0'
-            blocks.pop(position)
-            blocks.pop(position)
-            insert_at(i+2, [str(size), str(file_empty_size - size)], blocks)
-            blocks[position + 1] = str(int(blocks[position + 1]) + size)
+            if debug:
+                print(f"File '{id}' can be inserted in empty space of disk map at {i+2}")
+            left_empty_space = int(blocks[i + 1])
+            blocks[i + 1] = 0
+            blocks.pop(position) # (moved file size)
+            moved_empty_space = int(blocks.pop(position))
+            insert_at(i+2, [moved_size, left_empty_space - moved_size], blocks)
+            blocks[position + 1] = blocks[position + 1] + moved_size + moved_empty_space
             ids_register.remove(id)
             ids_register.insert(i // 2 + 1, id)
-        if debug:
-            print(f"Disk after '{9}': {''.join(decompress_with_register()}")
+        else:
+            if debug:
+                print(f"File '{id}' cannot be inserted in an empty space")
     if debug:
         print(f"Final register: {ids_register}")
-        print(f"Final disk map: {blocks}")
+        print(f"Final blocks (compressed): {blocks}")
+        print(f"Final blocks (decompressed): {to_string(decompress_with_register(blocks, ids_register))}")
+        print("")
     return blocks, ids_register
 
 def compute_checksum_compressed(blocks: list, ids_register: list) -> int:
@@ -199,7 +208,7 @@ def compute_checksum_compressed(blocks: list, ids_register: list) -> int:
     position = 0
     for i in range(len(ids_register)):
         id = ids_register[i]
-        size, empty = int(blocks[i*2]), int(blocks[i*2 + 1])
+        size, empty = blocks[i*2], blocks[i*2 + 1]
         for _ in range(size):
             res += position * id
             position += 1
@@ -273,6 +282,6 @@ if __name__ == '__main__':
     print("--- Part Two ---")
     t0 = time.time()
     print(f"Example result: {r2(example, True)}")
-    #print(f"Puzzle answer:  {r2(puzzle)}")
+    print(f"Puzzle answer:  {r2(puzzle)}")
     t1 = time.time()
     print(f"Part two computed in {t1 - t0} seconds.")
