@@ -9,7 +9,7 @@ const parseInput = function (content) {
 const findNumbersThatAddTo2020 = function (numbers) {
     for (let i = 0; i < numbers.length; i++) {
         const number1 = numbers[i]
-        for (let j = 0; j < numbers.length; j++) {
+        for (let j = i; j < numbers.length; j++) {
             const number2 = numbers[j]
             if (number1 + number2 === 2020)
                 return [number1, number2]
@@ -21,9 +21,9 @@ const findNumbersThatAddTo2020 = function (numbers) {
 const findThreeNumbersThatAddTo2020 = function (numbers) {
     for (let i = 0; i < numbers.length; i++) {
         const number1 = numbers[i]
-        for (let j = 0; j < numbers.length; j++) {
+        for (let j = i; j < numbers.length; j++) {
             const number2 = numbers[j]
-            for (let k = 0; k < numbers.length; k++) {
+            for (let k = j; k < numbers.length; k++) {
                 const number3 = numbers[k]
                     if (number1 + number2 + number3 === 2020)
                         return [number1, number2, number3]
