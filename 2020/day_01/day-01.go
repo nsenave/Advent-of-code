@@ -64,6 +64,16 @@ func parseInput(fileName string) ([]int, error) {
 
 // Utility functions
 
+func solver(solvingFunction func([]int) []int,numbers []int, parsingError error) {
+    if (parsingError != nil) {
+        fmt.Println("(input has not been parsed)")
+        return
+    }
+    matchingNumbers := solvingFunction(numbers)
+    fmt.Printf("Matching numbers: %v\n", matchingNumbers)
+    fmt.Printf("Answer: %d\n", product(matchingNumbers))
+}
+
 func product(numbers []int) int {
     result := 1
     for _, n := range numbers {
@@ -75,13 +85,7 @@ func product(numbers []int) int {
 // Part One
 
 func part1(numbers []int, parsingError error) {
-    if (parsingError != nil) {
-        fmt.Println("(input has not been parsed)")
-        return
-    }
-    matchingNumbers := findNumbersThatAddTo2020(numbers)
-    fmt.Printf("Matching numbers: %v\n", matchingNumbers)
-    fmt.Printf("Answer: %d\n", product(matchingNumbers))
+    solver(findNumbersThatAddTo2020, numbers, parsingError)
 }
 
 func findNumbersThatAddTo2020(numbers []int) []int {
@@ -102,13 +106,7 @@ func findNumbersThatAddTo2020(numbers []int) []int {
 // Part Two
 
 func part2(numbers []int, parsingError error) {
-    if (parsingError != nil) {
-        fmt.Println("(input has not been parsed)")
-        return
-    }
-    matchingNumbers := findThreeNumbersThatAddTo2020(numbers)
-    fmt.Printf("Matching numbers: %v\n", matchingNumbers)
-    fmt.Printf("Answer: %d\n", product(matchingNumbers))
+    solver(findThreeNumbersThatAddTo2020, numbers, parsingError)
 }
 
 func findThreeNumbersThatAddTo2020(numbers []int) []int {
