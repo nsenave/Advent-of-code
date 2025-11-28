@@ -28,6 +28,8 @@ func main() {
     part2(exampleNumbers, nil)
     fmt.Println("Input")
     part2(personalNumbers, err)
+
+    fmt.Println("")
 }
 
 // Input parsing
