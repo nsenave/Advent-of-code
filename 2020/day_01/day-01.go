@@ -9,33 +9,34 @@ import (
 )
 
 func main() {
-    exampleNumbers := parseInput("input-example.txt")
+    exampleNumbers, _ := parseInput("input-example.txt")
     fmt.Printf("Example input: %v\n", exampleNumbers)
-    personalNumbers := parseInput("input.txt")
+    personalNumbers, err := parseInput("input.txt")
 
     fmt.Println("")
 
     fmt.Println("--- Part One ---")
     fmt.Println("Example")
-    part1(exampleNumbers)
+    part1(exampleNumbers, nil)
     fmt.Println("Input")
-    part1(personalNumbers)
+    part1(personalNumbers, err)
 
     fmt.Println("")
 
     fmt.Println("--- Part Two ---")
     fmt.Println("Example")
-    part2(exampleNumbers)
+    part2(exampleNumbers, nil)
     fmt.Println("Input")
-    part2(personalNumbers)
+    part2(personalNumbers, err)
 }
 
 // Input parsing
 
-func parseInput(fileName string) []int {
+func parseInput(fileName string) ([]int, error) {
     inputFile, err := os.Open(fileName)
     if err != nil {
-        log.Fatal(err)
+        log.Printf("%v\n", err)
+        return []int{}, err
     }
     defer inputFile.Close()
 
@@ -56,7 +57,7 @@ func parseInput(fileName string) []int {
         log.Fatal(err)
     }
 
-    return numbers
+    return numbers, nil
 }
 
 // Utility functions
@@ -71,7 +72,11 @@ func product(numbers []int) int {
 
 // Part One
 
-func part1(numbers []int) {
+func part1(numbers []int, parsingError error) {
+    if (parsingError != nil) {
+        fmt.Println("(input has not been parsed)")
+        return
+    }
     matchingNumbers := findNumbersThatAddTo2020(numbers)
     fmt.Printf("Matching numbers: %v\n", matchingNumbers)
     fmt.Printf("Answer: %d\n", product(matchingNumbers))
@@ -88,13 +93,17 @@ func findNumbersThatAddTo2020(numbers []int) []int {
             }
         }
     }
-    log.Fatal("Didn't fund two numbers thats add to 2020.")
+    log.Fatal("Didn't find two numbers thats add to 2020.")
     return []int{}
 }
 
 // Part Two
 
-func part2(numbers []int) {
+func part2(numbers []int, parsingError error) {
+    if (parsingError != nil) {
+        fmt.Println("(input has not been parsed)")
+        return
+    }
     matchingNumbers := findThreeNumbersThatAddTo2020(numbers)
     fmt.Printf("Matching numbers: %v\n", matchingNumbers)
     fmt.Printf("Answer: %d\n", product(matchingNumbers))
@@ -114,6 +123,6 @@ func findThreeNumbersThatAddTo2020(numbers []int) []int {
             }
         }
     }
-    log.Fatal("Didn't fund two numbers thats add to 2020.")
+    log.Fatal("Didn't find three numbers thats add to 2020.")
     return []int{}
 }
