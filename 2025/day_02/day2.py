@@ -21,17 +21,12 @@ def strict_divisors(n: int) -> list:
             res.append(d)
     return res
 
-def all_match(pattern, window, id, id_length):
-    for i in range(window, id_length, window):
-        if id[i : i+window] != pattern:
-            return False
-    return True
-
 def is_invalid2(id: str) -> bool:
     id_length = len(id)
     for window in strict_divisors(id_length):
         pattern = id[:window]
-        if all_match(pattern, window, id, id_length):
+        assert pattern[0] != '0', "No leading zeros"
+        if pattern * (id_length // window) == id:
             return True
     return False
 
