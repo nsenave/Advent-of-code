@@ -23,6 +23,8 @@ def strict_divisors(n: int) -> list:
 
 def is_invalid2(id: str) -> bool:
     id_length = len(id)
+    if (id_length == 1):
+        return False
     for window in strict_divisors(id_length):
         pattern = id[:window]
         assert pattern[0] != '0', "No leading zeros"
@@ -52,16 +54,17 @@ def r1(puzzle_input, debug=False) :
 def r2(puzzle_input, debug=False) :
     if puzzle_input is None:
         return None
+    res = 0
     invalid_ids = []
     for x in puzzle_input :
         for int_id in range(x[0], x[1] + 1):
             if (is_invalid2(str(int_id))):
-                invalid_ids.append(int_id)
+                res += int_id
+                if debug:
+                    invalid_ids.append(int_id)
     if debug:
         print(f"Invalid ids: {invalid_ids}")
-    result = sum(invalid_ids)
-    assert result == sum(set(invalid_ids)), "Not a matter of duplicates"
-    return result
+    return res
 
 
 
