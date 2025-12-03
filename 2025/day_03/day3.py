@@ -33,7 +33,7 @@ def r1(puzzle_input, debug=False) :
         n2 = max(x[i+1:])
         voltage = str(n1) + str(n2)
         if debug:
-            print(voltage)
+            print(f"Line voltage {voltage}")
         res += int(voltage)
     return res
 
@@ -63,8 +63,8 @@ def r2(puzzle_input, debug=False) :
         voltage = ''
         for right_border in reversed(range(0, 12)):
             if debug:
-                print(x)
-            n = find_max2(x, right_border)
+                print(numbers)
+            n = find_max2(numbers, right_border)
             voltage += str(n)
         if debug:
             print(f"Line voltage {voltage}")
