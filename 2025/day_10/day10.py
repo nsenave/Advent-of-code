@@ -69,10 +69,7 @@ def find_min_press_number(x):
 def r1(puzzle_input, debug=False) :
     if puzzle_input is None:
         return None
-    res = 0
-    for x in puzzle_input :
-        pass
-    return res
+    return sum(map(find_min_press_number, puzzle_input))
 
 
 
